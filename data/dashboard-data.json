@@ -1505,7 +1505,7 @@
       "id": "avoidedPurchase",
       "order": 5
     }
-  ]
+  ],
   "perceptionsByGroup": [
   {
     "Department": "English",
@@ -1528,12 +1528,12 @@
     "More Engaging": 4.04,
     "Overall Satisfaction": 4.38,
 
-    "Chose not to purchase": 405,
-    "Taken fewer courses": 251,
-    "Earned a poor grade": 197,
-    "Delayed a course": 183,
-    "Withdrew from course": 114,
-    "Failed a course": 61,
+    "Chose not to purchase materials": 405,
+"Taken fewer courses": 251,
+"Earned a poor grade": 197,
+"Delayed taking a course": 183,
+"Withdrew from a course": 114,
+"Failed a course": 61
 
     "Superior": 436,
     "Comparable": 615,
