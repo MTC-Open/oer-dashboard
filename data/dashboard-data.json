@@ -1506,4 +1506,38 @@
       "order": 5
     }
   ]
+  "perceptionsByGroup": [
+  {
+    "Department": "English",
+    "Discipline": "ENG",
+    "Course": "ENG-101",
+    "Responses": 245,
+
+    "Cost Concern": 0.57,
+    "Skipped Buying": 0.37,
+    "First-Day Access": 4.02,
+    "Want More OER": 2.79,
+
+    "Easy to Access": 4.58,
+    "Supports Learning": 4.54,
+    "Easy to Use": 4.54,
+    "Recommend OER": 4.46,
+    "Prefer OER": 4.43,
+    "Up to Date": 4.35,
+    "More Useful": 4.11,
+    "More Engaging": 4.04,
+    "Overall Satisfaction": 4.38,
+
+    "Chose not to purchase": 405,
+    "Taken fewer courses": 251,
+    "Earned a poor grade": 197,
+    "Delayed a course": 183,
+    "Withdrew from course": 114,
+    "Failed a course": 61,
+
+    "Superior": 436,
+    "Comparable": 615,
+    "Inferior": 120
+  }
+]
 }
