@@ -90,7 +90,30 @@
 .status-summary .status-chip {
   white-space: normal;
 }
+.table-message {
+  margin: 12px 0 14px;
+  padding: 12px 14px;
+  border-left: 6px solid var(--gold);
+  background: #fff8ea;
+  border-radius: 12px;
+  color: var(--navy);
+  font-size: .92rem;
+  line-height: 1.45;
+}
 
+.table-message strong {
+  font-weight: 900;
+}
+
+.table-message.info {
+  border-left-color: var(--blue);
+  background: #f4f7f9;
+}
+
+.table-message.warning {
+  border-left-color: var(--gold);
+  background: #fff8ea;
+}
   </style>
 </head>
 <body><main class="dashboard">
@@ -233,39 +256,47 @@
     <h2>OER Course Implementation and Verified Impact</h2>
     <p>Scrollable, sortable course-level view of implementation status, launch term, verified OER enrollments, verified term(s), and estimated textbook savings. Displays 20 rows at a time.</p>
 
-    <div class="table-toolbar">
-      <div class="search">
-        <label for="tableSearch">Search table</label>
-        <input id="tableSearch" type="search" placeholder="Search course, department, or status">
-      </div>
-      <div class="footnote" id="tableCount">—</div>
-    </div>
+<section class="card">
+  <h2>OER Course Implementation and Verified Impact</h2>
+  <p>
+    Scrollable, sortable course-level view of implementation status, launch term,
+    verified OER enrollments, verified term(s), and estimated textbook savings.
+    Displays 20 rows at a time.
+  </p>
 
-    <div class="table-wrap">
-      <table id="impactTable">
-        <thead>
-          <tr>
-            <th data-sort="Course">Course</th>
-            <th data-sort="Department">Department</th>
-            <th data-sort="Status">Implementation status</th>
-            <th data-sort="Launch">Launch term</th>
-            <th data-sort="Semester">Verified term(s)</th>
-            <th data-sort="Enrollment">Enrollments impacted</th>
-            <th data-sort="Savings">Estimated Savings</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+  <div id="courseTableMessage" class="table-message" hidden></div>
 
-    <div class="pager">
-      <button id="prevPage">Previous 20</button>
-      <span id="pageInfo">—</span>
-      <button id="nextPage">Next 20</button>
+  <div class="table-toolbar">
+    <div class="search">
+      <label for="tableSearch">Search table</label>
+      <input id="tableSearch" type="search" placeholder="Search course, department, or status">
     </div>
-  </section>
+    <div class="footnote" id="tableCount">—</div>
+  </div>
+
+  <div class="table-wrap">
+    <table id="impactTable">
+      <thead>
+        <tr>
+          <th data-sort="Course">Course</th>
+          <th data-sort="Department">Department</th>
+          <th data-sort="Status">Implementation status</th>
+          <th data-sort="Launch">Launch term</th>
+          <th data-sort="Semester">Verified term(s)</th>
+          <th data-sort="Enrollment">Enrollments impacted</th>
+          <th data-sort="Savings">Estimated Savings</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="pager">
+    <button id="prevPage">Previous 20</button>
+    <span id="pageInfo">—</span>
+    <button id="nextPage">Next 20</button>
+  </div>
 </section>
-
 <section id="perceptions" class="tab-panel">
   <section class="filters perception-filters" aria-label="Student perception filters">
     <div>
@@ -351,8 +382,57 @@ function renderProjectedGrowth(){
 }
 function renderCharts(impactRows,implementationRows,sem){const pipe=new Map();implementationRows.forEach(r=>{let s=statusValue(r);pipe.set(s,(pipe.get(s)||0)+1)});let pipeRowsSorted=[...pipe.entries()].map(([k,v])=>({k,v})).sort((a,b)=>b.v-a.v);doughnut('pipelineChart',pipeRowsSorted.map(x=>x.k),pipeRowsSorted.map(x=>x.v));const dept=new Map();impactRows.forEach(r=>{let d=norm(r.Department)||'Unassigned';dept.set(d,(dept.get(d)||0)+getMetric(r,sem,'savings'))});let deptRows=[...dept.entries()].map(([department,savings])=>({department,savings})).filter(x=>x.savings>0).sort((a,b)=>b.savings-a.savings).slice(0,5);barChart('deptChart',deptRows.map(x=>x.department),deptRows.map(x=>x.savings),COLORS.teal,true);let topSavings=topRows(impactRows,sem,'savings',10);barChart('topSavingsChart',topSavings.map(x=>x.course),topSavings.map(x=>x.value),COLORS.gold,true);let topStudents=topRows(impactRows,sem,'enrollment',10);barChart('topStudentsChart',topStudents.map(x=>x.course),topStudents.map(x=>x.value),COLORS.blue,false)}
 function tableData(){const sem=byId('semesterFilter').value;return implementationRowsFiltered().map(r=>{const enrollment=getMetric(r,sem,'enrollment'), savings=getMetric(r,sem,'savings');const termsLabel=(enrollment>0||savings>0||getSections(r,sem)>0)?verifiedTermLabels(r,sem):'Not yet counted';return{Course:course(r.Course),Department:norm(r.Department),Status:statusValue(r),Launch:launchTerm(r),Semester:termsLabel,Enrollment:enrollment,Savings:savings}})}
-function renderTable(){let rows=tableData();const q=norm(byId('tableSearch').value).toLowerCase();if(q)rows=rows.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(q)));rows.sort((a,b)=>{let av=a[sortState.key], bv=b[sortState.key]; if(['Enrollment','Savings'].includes(sortState.key)){av=toNumber(av);bv=toNumber(bv);return sortState.direction==='asc'?av-bv:bv-av} return sortState.direction==='asc'?String(av).localeCompare(String(bv)):String(bv).localeCompare(String(av))});const pages=Math.max(1,Math.ceil(rows.length/pageSize));if(currentPage>pages)currentPage=pages;const start=(currentPage-1)*pageSize;const page=rows.slice(start,start+pageSize);byId('impactTable').querySelector('tbody').innerHTML=page.map(r=>`<tr><td>${r.Course}</td><td>${r.Department}</td><td><span class="badge ${statusClass(r.Status)}">${r.Status}</span></td><td>${r.Launch}</td><td>${r.Semester}</td><td>${formatNumber.format(r.Enrollment)}</td><td>${formatCurrency.format(r.Savings)}</td></tr>`).join('');byId('tableCount').textContent=`${formatNumber.format(rows.length)} matching courses`;byId('pageInfo').textContent=`Rows ${rows.length?start+1:0}–${Math.min(start+pageSize,rows.length)} of ${rows.length}`;byId('prevPage').disabled=currentPage<=1;byId('nextPage').disabled=currentPage>=pages}
-function displayValue(metric,value){if(typeof value==='number'){if(metric.toLowerCase().includes('rate'))return formatPercent.format(value);return formatNumber.format(value)}return value}
+function renderTable(){
+  let rows = tableData();
+  const q = norm(byId('tableSearch').value).toLowerCase();
+
+  if (q) {
+    rows = rows.filter(r =>
+      Object.values(r).some(v => String(v).toLowerCase().includes(q))
+    );
+  }
+
+  renderCourseTableMessage(rows);
+
+  rows.sort((a,b) => {
+    let av = a[sortState.key], bv = b[sortState.key];
+
+    if (['Enrollment','Savings'].includes(sortState.key)) {
+      av = toNumber(av);
+      bv = toNumber(bv);
+      return sortState.direction === 'asc' ? av - bv : bv - av;
+    }
+
+    return sortState.direction === 'asc'
+      ? String(av).localeCompare(String(bv))
+      : String(bv).localeCompare(String(av));
+  });
+
+  const pages = Math.max(1, Math.ceil(rows.length / pageSize));
+  if (currentPage > pages) currentPage = pages;
+
+  const start = (currentPage - 1) * pageSize;
+  const page = rows.slice(start, start + pageSize);
+
+  byId('impactTable').querySelector('tbody').innerHTML = page.length
+    ? page.map(r => `
+        <tr>
+          <td>${r.Course}</td>
+          <td>${r.Department}</td>
+          <td><span class="badge ${statusClass(r.Status)}">${r.Status}</span></td>
+          <td>${r.Launch}</td>
+          <td>${r.Semester}</td>
+          <td>${formatNumber.format(r.Enrollment)}</td>
+          <td>${formatCurrency.format(r.Savings)}</td>
+        </tr>
+      `).join('')
+    : `<tr><td colspan="7">No matching courses found for the selected filters.</td></tr>`;
+
+  byId('tableCount').textContent = `${formatNumber.format(rows.length)} matching courses`;
+  byId('pageInfo').textContent = `Rows ${rows.length ? start + 1 : 0}–${Math.min(start + pageSize, rows.length)} of ${rows.length}`;
+  byId('prevPage').disabled = currentPage <= 1;
+  byId('nextPage').disabled = currentPage >= pages;
+}function displayValue(metric,value){if(typeof value==='number'){if(metric.toLowerCase().includes('rate'))return formatPercent.format(value);return formatNumber.format(value)}return value}
 function getDiscipline(courseCode){const clean=String(courseCode||'').trim().toUpperCase();const match=clean.match(/^[A-Z]+/);return match?match[0]:'Unknown'}
 function stars(score){const rounded=Math.round(toNumber(score));const full=Math.max(0,Math.min(5,rounded));return '★'.repeat(full)+'☆'.repeat(5-full)}
 function perceptionRows(){const rows=dashboardData.perceptionsByGroup||[];return rows.map(row=>({...row,Department:norm(row.Department),Discipline:norm(row.Discipline||getDiscipline(row.Course)),Course:course(row.Course)}))}
@@ -360,6 +440,43 @@ function filteredPerceptionRows(){const dept=byId('perceptionDepartmentFilter')?
 function hasActivePerceptionFilter(){return ['perceptionDepartmentFilter','perceptionDisciplineFilter','perceptionCourseFilter'].some(id=>{const el=byId(id);return el&&el.value!=='all'})}
 function weightedAverage(rows,metric){const totalResponses=rows.reduce((sum,r)=>sum+toNumber(r.Responses),0);if(!totalResponses)return 0;return rows.reduce((sum,r)=>sum+(toNumber(r[metric])*toNumber(r.Responses)),0)/totalResponses}
 function sumMetric(rows,metric){return rows.reduce((sum,r)=>sum+toNumber(r[metric]),0)}
+  function renderCourseTableMessage(rows){
+  const msg = byId('courseTableMessage');
+  if (!msg) return;
+
+  const status = statusFilterValue();
+  const statusLower = String(status).toLowerCase();
+
+  msg.hidden = false;
+  msg.className = 'table-message';
+
+  if (statusLower.includes('pilot')) {
+    msg.classList.add('warning');
+    msg.innerHTML =
+      '<strong>Pilot courses are shown for implementation tracking only.</strong> Savings, enrollments, and OER sections are not counted because verified section-level impact is not yet available.';
+    return;
+  }
+
+  if (statusLower.includes('development')) {
+    msg.classList.add('warning');
+    msg.innerHTML =
+      '<strong>Courses in development are shown for implementation tracking only.</strong> They are not included in savings, enrollments, or OER section totals until full deployment can be confirmed.';
+    return;
+  }
+
+  if (status === 'all') {
+    const hasUncounted = rows.some(r => String(r.Semester).toLowerCase().includes('not yet counted'));
+    if (hasUncounted) {
+      msg.classList.add('info');
+      msg.innerHTML =
+        '<strong>Some courses are listed for implementation tracking only.</strong> Pilot and development courses appear in the table, but they are not included in savings, enrollment, or section totals until verified section-level impact is available.';
+      return;
+    }
+  }
+
+  msg.hidden = true;
+  msg.innerHTML = '';
+}
 function initPerceptionFilters(){refreshPerceptionFilterOptions();byId('perceptionDepartmentFilter').addEventListener('change',()=>{byId('perceptionDisciplineFilter').value='all';byId('perceptionCourseFilter').value='all';refreshPerceptionFilterOptions();renderStaticPerceptions()});byId('perceptionDisciplineFilter').addEventListener('change',()=>{byId('perceptionCourseFilter').value='all';refreshPerceptionFilterOptions();renderStaticPerceptions()});byId('perceptionCourseFilter').addEventListener('change',()=>renderStaticPerceptions())}
 function refreshPerceptionFilterOptions(){const rows=perceptionRows();const selectedDept=byId('perceptionDepartmentFilter')?.value||'all';const selectedDiscipline=byId('perceptionDisciplineFilter')?.value||'all';const selectedCourse=byId('perceptionCourseFilter')?.value||'all';const disciplineRows=rows.filter(r=>selectedDept==='all'||r.Department===selectedDept);const courseRows=rows.filter(r=>(selectedDept==='all'||r.Department===selectedDept)&&(selectedDiscipline==='all'||r.Discipline===selectedDiscipline));populateSelect('perceptionDepartmentFilter','All departments',uniqueSorted(rows.map(r=>r.Department)));populateSelect('perceptionDisciplineFilter','All disciplines',uniqueSorted(disciplineRows.map(r=>r.Discipline)));populateSelect('perceptionCourseFilter','All courses',uniqueSorted(courseRows.map(r=>r.Course)));if([...byId('perceptionDepartmentFilter').options].some(o=>o.value===selectedDept))byId('perceptionDepartmentFilter').value=selectedDept;if([...byId('perceptionDisciplineFilter').options].some(o=>o.value===selectedDiscipline))byId('perceptionDisciplineFilter').value=selectedDiscipline;if([...byId('perceptionCourseFilter').options].some(o=>o.value===selectedCourse))byId('perceptionCourseFilter').value=selectedCourse}
 function renderStaticPerceptions(){const groupedRows=filteredPerceptionRows();const useGrouped=hasActivePerceptionFilter()&&groupedRows.length>0;const totalResponses=useGrouped?sumMetric(groupedRows,'Responses'):toNumber((dashboardData.responseMetrics||{})['Total Survey Responses']);const minimumResponses=10;if(useGrouped&&totalResponses<minimumResponses){byId('perceptionFilterNote').style.display='block';byId('perceptionFilterNote').innerHTML='<strong>Not enough responses to display this filtered view.</strong> Broaden the filters to protect privacy and avoid over-interpreting small groups.';return}else{byId('perceptionFilterNote').style.display='none'}
