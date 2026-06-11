@@ -254,48 +254,45 @@
 
   <section class="card">
     <h2>OER Course Implementation and Verified Impact</h2>
-    <p>Scrollable, sortable course-level view of implementation status, launch term, verified OER enrollments, verified term(s), and estimated textbook savings. Displays 20 rows at a time.</p>
+    <p>
+      Scrollable, sortable course-level view of implementation status, launch term,
+      verified OER enrollments, verified term(s), and estimated textbook savings.
+      Displays 20 rows at a time.
+    </p>
 
-<section class="card">
-  <h2>OER Course Implementation and Verified Impact</h2>
-  <p>
-    Scrollable, sortable course-level view of implementation status, launch term,
-    verified OER enrollments, verified term(s), and estimated textbook savings.
-    Displays 20 rows at a time.
-  </p>
+    <div id="courseTableMessage" class="table-message" hidden></div>
 
-  <div id="courseTableMessage" class="table-message" hidden></div>
-
-  <div class="table-toolbar">
-    <div class="search">
-      <label for="tableSearch">Search table</label>
-      <input id="tableSearch" type="search" placeholder="Search course, department, or status">
+    <div class="table-toolbar">
+      <div class="search">
+        <label for="tableSearch">Search table</label>
+        <input id="tableSearch" type="search" placeholder="Search course, department, or status">
+      </div>
+      <div class="footnote" id="tableCount">—</div>
     </div>
-    <div class="footnote" id="tableCount">—</div>
-  </div>
 
-  <div class="table-wrap">
-    <table id="impactTable">
-      <thead>
-        <tr>
-          <th data-sort="Course">Course</th>
-          <th data-sort="Department">Department</th>
-          <th data-sort="Status">Implementation status</th>
-          <th data-sort="Launch">Launch term</th>
-          <th data-sort="Semester">Verified term(s)</th>
-          <th data-sort="Enrollment">Enrollments impacted</th>
-          <th data-sort="Savings">Estimated Savings</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+    <div class="table-wrap">
+      <table id="impactTable">
+        <thead>
+          <tr>
+            <th data-sort="Course">Course</th>
+            <th data-sort="Department">Department</th>
+            <th data-sort="Status">Implementation status</th>
+            <th data-sort="Launch">Launch term</th>
+            <th data-sort="Semester">Verified term(s)</th>
+            <th data-sort="Enrollment">Enrollments impacted</th>
+            <th data-sort="Savings">Estimated Savings</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-  <div class="pager">
-    <button id="prevPage">Previous 20</button>
-    <span id="pageInfo">—</span>
-    <button id="nextPage">Next 20</button>
-  </div>
+    <div class="pager">
+      <button id="prevPage">Previous 20</button>
+      <span id="pageInfo">—</span>
+      <button id="nextPage">Next 20</button>
+    </div>
+  </section>
 </section>
 <section id="perceptions" class="tab-panel">
   <section class="filters perception-filters" aria-label="Student perception filters">
@@ -346,10 +343,194 @@ function termValue(row,termKey,type){const t=row.Terms?.[termKey] || {}; if(type
 function getMetric(row,semester,type){return selectedTerms(semester).reduce((sum,t)=>sum+termValue(row,t.key,type),0)}
 function getSections(row,semester){return getMetric(row,semester,'sections')}
 function hasVerifiedImpact(row,semester){return getMetric(row,semester,'enrollment')>0 || getMetric(row,semester,'savings')>0 || getSections(row,semester)>0}
-function destroyChart(id){if(charts[id]){charts[id].destroy(); charts[id]=null}}
-function chartBase(indexAxis='x',currency=false){return{responsive:true,maintainAspectRatio:false,indexAxis,plugins:{legend:{display:false},tooltip:{callbacks:{label:(ctx)=>{const v=ctx.parsed.x??ctx.parsed.y??ctx.raw;return currency?formatCurrency.format(v):formatNumber.format(v)}}}},scales:{x:{ticks:{color:COLORS.text,callback:(value)=>{const v=Number(value);if(!Number.isFinite(v))return value;return currency?'$'+Intl.NumberFormat('en-US',{notation:'compact'}).format(v):Intl.NumberFormat('en-US',{notation:'compact'}).format(v)}},grid:{color:'rgba(80,88,89,.12)'}},y:{ticks:{color:COLORS.text},grid:{display:false}}}}}
-function barChart(id,labels,values,color,currency=false){destroyChart(id);charts[id]=new Chart(byId(id),{type:'bar',data:{labels,datasets:[{data:values,backgroundColor:color,borderColor:color,borderRadius:8}]},options:chartBase('y',currency)})}
-function doughnut(id,labels,values){destroyChart(id);charts[id]=new Chart(byId(id),{type:'doughnut',data:{labels,datasets:[{data:values,backgroundColor:[COLORS.green,COLORS.gold,COLORS.blue,COLORS.orange,COLORS.teal,COLORS.gray],borderColor:'#fff',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:COLORS.text}},tooltip:{callbacks:{label:(ctx)=>`${ctx.label}: ${formatNumber.format(ctx.raw)}`}}}}})}
+function destroyChart(id){
+  if(charts[id]){
+    charts[id].destroy();
+    charts[id]=null;
+  }
+}
+
+const noDataPlugin = {
+  id: 'noDataMessage',
+  afterDraw(chart, args, pluginOptions) {
+    const datasets = chart.data?.datasets || [];
+    const hasData = datasets.some(ds =>
+      (ds.data || []).some(value => toNumber(value) > 0)
+    );
+
+    if (hasData) return;
+
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+
+    const message = pluginOptions?.message || 'No verified impact data for this selection.';
+    const submessage = pluginOptions?.submessage || 'Pilot and development courses are shown for implementation tracking only.';
+
+    ctx.save();
+
+    const boxX = chartArea.left + 16;
+    const boxY = chartArea.top + 24;
+    const boxW = chartArea.right - chartArea.left - 32;
+    const boxH = chartArea.bottom - chartArea.top - 48;
+    const radius = 14;
+
+    ctx.fillStyle = '#f4f7f9';
+    ctx.strokeStyle = '#d9e3e8';
+    ctx.lineWidth = 1;
+
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(boxX, boxY, boxW, boxH, radius);
+    } else {
+      ctx.moveTo(boxX + radius, boxY);
+      ctx.lineTo(boxX + boxW - radius, boxY);
+      ctx.quadraticCurveTo(boxX + boxW, boxY, boxX + boxW, boxY + radius);
+      ctx.lineTo(boxX + boxW, boxY + boxH - radius);
+      ctx.quadraticCurveTo(boxX + boxW, boxY + boxH, boxX + boxW - radius, boxY + boxH);
+      ctx.lineTo(boxX + radius, boxY + boxH);
+      ctx.quadraticCurveTo(boxX, boxY + boxH, boxX, boxY + boxH - radius);
+      ctx.lineTo(boxX, boxY + radius);
+      ctx.quadraticCurveTo(boxX, boxY, boxX + radius, boxY);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    const centerX = (chartArea.left + chartArea.right) / 2;
+    const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    ctx.fillStyle = COLORS.navy;
+    ctx.font = '700 15px Arial, Helvetica, sans-serif';
+    ctx.fillText(message, centerX, centerY - 12);
+
+    ctx.fillStyle = '#647174';
+    ctx.font = '12px Arial, Helvetica, sans-serif';
+    ctx.fillText(submessage, centerX, centerY + 12);
+
+    ctx.restore();
+  }
+};
+
+Chart.register(noDataPlugin);
+
+function noDataText(){
+  const status = statusFilterValue().toLowerCase();
+
+  if (status.includes('pilot')) {
+    return {
+      message: 'No verified impact data for pilot courses.',
+      submessage: 'Pilot courses are tracked as implementation activity until section-level impact is confirmed.'
+    };
+  }
+
+  if (status.includes('development')) {
+    return {
+      message: 'No verified impact data for courses in development.',
+      submessage: 'Development courses are not counted in savings, enrollment, or section totals yet.'
+    };
+  }
+
+  return {
+    message: 'No verified impact data for this selection.',
+    submessage: 'Try broadening the filters or selecting fully deployed courses.'
+  };
+}
+
+function chartBase(indexAxis='x',currency=false,noDataOptions={}){
+  return{
+    responsive:true,
+    maintainAspectRatio:false,
+    indexAxis,
+    plugins:{
+      legend:{display:false},
+      noDataMessage:noDataOptions,
+      tooltip:{
+        callbacks:{
+          label:(ctx)=>{
+            const v=ctx.parsed.x??ctx.parsed.y??ctx.raw;
+            return currency?formatCurrency.format(v):formatNumber.format(v);
+          }
+        }
+      }
+    },
+    scales:{
+      x:{
+        ticks:{
+          color:COLORS.text,
+          callback:(value)=>{
+            const v=Number(value);
+            if(!Number.isFinite(v))return value;
+            return currency
+              ? '$'+Intl.NumberFormat('en-US',{notation:'compact'}).format(v)
+              : Intl.NumberFormat('en-US',{notation:'compact'}).format(v);
+          }
+        },
+        grid:{color:'rgba(80,88,89,.12)'}
+      },
+      y:{
+        ticks:{color:COLORS.text},
+        grid:{display:false}
+      }
+    }
+  };
+}
+
+function barChart(id,labels,values,color,currency=false,noDataOptions=noDataText()){
+  destroyChart(id);
+  const safeLabels = labels.length ? labels : ['No verified data'];
+  const safeValues = values.length ? values : [0];
+
+  charts[id]=new Chart(byId(id),{
+    type:'bar',
+    data:{
+      labels:safeLabels,
+      datasets:[{
+        data:safeValues,
+        backgroundColor:color,
+        borderColor:color,
+        borderRadius:8
+      }]
+    },
+    options:chartBase('y',currency,noDataOptions)
+  });
+}
+
+function doughnut(id,labels,values,noDataOptions=noDataText()){
+  destroyChart(id);
+  const safeLabels = labels.length ? labels : ['No verified data'];
+  const safeValues = values.length ? values : [0];
+
+  charts[id]=new Chart(byId(id),{
+    type:'doughnut',
+    data:{
+      labels:safeLabels,
+      datasets:[{
+        data:safeValues,
+        backgroundColor:[COLORS.green,COLORS.gold,COLORS.blue,COLORS.orange,COLORS.teal,COLORS.gray],
+        borderColor:'#fff',
+        borderWidth:3
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          position:'bottom',
+          labels:{color:COLORS.text}
+        },
+        noDataMessage:noDataOptions,
+        tooltip:{
+          callbacks:{
+            label:(ctx)=>`${ctx.label}: ${formatNumber.format(ctx.raw)}`
+          }
+        }
+      }
+    }
+  });
+}
 async function loadData(){try{if(window.EMBEDDED_DASHBOARD_DATA){dashboardData=window.EMBEDDED_DASHBOARD_DATA}else{const response=await fetch(DATA_URL+'?v='+Date.now(),{cache:'no-store'});if(!response.ok)throw new Error(`Could not fetch ${DATA_URL} (${response.status})`);dashboardData=await response.json()}init()}catch(error){console.error(error);byId('errorBox').style.display='block';byId('errorBox').textContent='Dashboard data could not be loaded. Check that data/dashboard-data.json exists in the GitHub repository.'}}
 function populateSelect(id,allLabel,values){const select=byId(id), current=select.value; select.innerHTML=`<option value="all">${allLabel}</option>`+values.map(v=>`<option value="${String(v).replace(/"/g,'&quot;')}">${v}</option>`).join(''); if([...select.options].some(o=>o.value===current))select.value=current}
 function uniqueSorted(values){return[...new Set(values.filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b)))}
@@ -380,7 +561,70 @@ function renderProjectedGrowth(){
   byId('projectedGrowthNote').textContent =
     `This projection is based on the average savings per fully deployed course (${formatCurrency.format(average)}) and does not estimate future section-level enrollment.`;
 }
-function renderCharts(impactRows,implementationRows,sem){const pipe=new Map();implementationRows.forEach(r=>{let s=statusValue(r);pipe.set(s,(pipe.get(s)||0)+1)});let pipeRowsSorted=[...pipe.entries()].map(([k,v])=>({k,v})).sort((a,b)=>b.v-a.v);doughnut('pipelineChart',pipeRowsSorted.map(x=>x.k),pipeRowsSorted.map(x=>x.v));const dept=new Map();impactRows.forEach(r=>{let d=norm(r.Department)||'Unassigned';dept.set(d,(dept.get(d)||0)+getMetric(r,sem,'savings'))});let deptRows=[...dept.entries()].map(([department,savings])=>({department,savings})).filter(x=>x.savings>0).sort((a,b)=>b.savings-a.savings).slice(0,5);barChart('deptChart',deptRows.map(x=>x.department),deptRows.map(x=>x.savings),COLORS.teal,true);let topSavings=topRows(impactRows,sem,'savings',10);barChart('topSavingsChart',topSavings.map(x=>x.course),topSavings.map(x=>x.value),COLORS.gold,true);let topStudents=topRows(impactRows,sem,'enrollment',10);barChart('topStudentsChart',topStudents.map(x=>x.course),topStudents.map(x=>x.value),COLORS.blue,false)}
+function renderCharts(impactRows,implementationRows,sem){
+  const noData = noDataText();
+
+  const pipe = new Map();
+  implementationRows.forEach(r=>{
+    let s=statusValue(r);
+    pipe.set(s,(pipe.get(s)||0)+1);
+  });
+
+  let pipeRowsSorted=[...pipe.entries()]
+    .map(([k,v])=>({k,v}))
+    .sort((a,b)=>b.v-a.v);
+
+  doughnut(
+    'pipelineChart',
+    pipeRowsSorted.map(x=>x.k),
+    pipeRowsSorted.map(x=>x.v),
+    {
+      message:'No courses match this implementation selection.',
+      submessage:'Try broadening the department, course, or status filters.'
+    }
+  );
+
+  const dept = new Map();
+  impactRows.forEach(r=>{
+    let d=norm(r.Department)||'Unassigned';
+    dept.set(d,(dept.get(d)||0)+getMetric(r,sem,'savings'));
+  });
+
+  let deptRows=[...dept.entries()]
+    .map(([department,savings])=>({department,savings}))
+    .filter(x=>x.savings>0)
+    .sort((a,b)=>b.savings-a.savings)
+    .slice(0,5);
+
+  barChart(
+    'deptChart',
+    deptRows.map(x=>x.department),
+    deptRows.map(x=>x.savings),
+    COLORS.teal,
+    true,
+    noData
+  );
+
+  let topSavings=topRows(impactRows,sem,'savings',10);
+  barChart(
+    'topSavingsChart',
+    topSavings.map(x=>x.course),
+    topSavings.map(x=>x.value),
+    COLORS.gold,
+    true,
+    noData
+  );
+
+  let topStudents=topRows(impactRows,sem,'enrollment',10);
+  barChart(
+    'topStudentsChart',
+    topStudents.map(x=>x.course),
+    topStudents.map(x=>x.value),
+    COLORS.blue,
+    false,
+    noData
+  );
+}
 function tableData(){const sem=byId('semesterFilter').value;return implementationRowsFiltered().map(r=>{const enrollment=getMetric(r,sem,'enrollment'), savings=getMetric(r,sem,'savings');const termsLabel=(enrollment>0||savings>0||getSections(r,sem)>0)?verifiedTermLabels(r,sem):'Not yet counted';return{Course:course(r.Course),Department:norm(r.Department),Status:statusValue(r),Launch:launchTerm(r),Semester:termsLabel,Enrollment:enrollment,Savings:savings}})}
 function renderTable(){
   let rows = tableData();
