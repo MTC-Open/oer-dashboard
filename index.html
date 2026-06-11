@@ -364,51 +364,18 @@ const noDataPlugin = {
     if (!chartArea) return;
 
     const message = pluginOptions?.message || 'No verified impact data for this selection.';
-    const submessage = pluginOptions?.submessage || 'Pilot and development courses are shown for implementation tracking only.';
 
     ctx.save();
-
-    const boxX = chartArea.left + 16;
-    const boxY = chartArea.top + 24;
-    const boxW = chartArea.right - chartArea.left - 32;
-    const boxH = chartArea.bottom - chartArea.top - 48;
-    const radius = 14;
-
-    ctx.fillStyle = '#f4f7f9';
-    ctx.strokeStyle = '#d9e3e8';
-    ctx.lineWidth = 1;
-
-    ctx.beginPath();
-    if (ctx.roundRect) {
-      ctx.roundRect(boxX, boxY, boxW, boxH, radius);
-    } else {
-      ctx.moveTo(boxX + radius, boxY);
-      ctx.lineTo(boxX + boxW - radius, boxY);
-      ctx.quadraticCurveTo(boxX + boxW, boxY, boxX + boxW, boxY + radius);
-      ctx.lineTo(boxX + boxW, boxY + boxH - radius);
-      ctx.quadraticCurveTo(boxX + boxW, boxY + boxH, boxX + boxW - radius, boxY + boxH);
-      ctx.lineTo(boxX + radius, boxY + boxH);
-      ctx.quadraticCurveTo(boxX, boxY + boxH, boxX, boxY + boxH - radius);
-      ctx.lineTo(boxX, boxY + radius);
-      ctx.quadraticCurveTo(boxX, boxY, boxX + radius, boxY);
-    }
-    ctx.fill();
-    ctx.stroke();
-
-    const centerX = (chartArea.left + chartArea.right) / 2;
-    const centerY = (chartArea.top + chartArea.bottom) / 2;
-
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-
     ctx.fillStyle = COLORS.navy;
-    ctx.font = '700 15px Arial, Helvetica, sans-serif';
-    ctx.fillText(message, centerX, centerY - 12);
-
-    ctx.fillStyle = '#647174';
-    ctx.font = '12px Arial, Helvetica, sans-serif';
-    ctx.fillText(submessage, centerX, centerY + 12);
-
+    ctx.font = '700 14px Arial, Helvetica, sans-serif';
+    ctx.fillText(
+      message,
+      (chartArea.left + chartArea.right) / 2,
+      (chartArea.top + chartArea.bottom) / 2,
+      chartArea.right - chartArea.left - 24
+    );
     ctx.restore();
   }
 };
@@ -418,23 +385,14 @@ Chart.register(noDataPlugin);
 function noDataText(){
   const status = statusFilterValue().toLowerCase();
 
-  if (status.includes('pilot')) {
+  if (status.includes('pilot') || status.includes('development')) {
     return {
-      message: 'No verified impact data for pilot courses.',
-      submessage: 'Pilot courses are tracked as implementation activity until section-level impact is confirmed.'
-    };
-  }
-
-  if (status.includes('development')) {
-    return {
-      message: 'No verified impact data for courses in development.',
-      submessage: 'Development courses are not counted in savings, enrollment, or section totals yet.'
+      message: 'Tracked for implementation; not counted as verified impact yet.'
     };
   }
 
   return {
-    message: 'No verified impact data for this selection.',
-    submessage: 'Try broadening the filters or selecting fully deployed courses.'
+    message: 'No verified impact data for this selection.'
   };
 }
 
@@ -579,8 +537,7 @@ function renderCharts(impactRows,implementationRows,sem){
     pipeRowsSorted.map(x=>x.k),
     pipeRowsSorted.map(x=>x.v),
     {
-      message:'No courses match this implementation selection.',
-      submessage:'Try broadening the department, course, or status filters.'
+      message:'No courses match this selection.'
     }
   );
 
