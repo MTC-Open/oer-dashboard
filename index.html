@@ -514,7 +514,7 @@ function renderProjectedGrowth(){
   const average = toNumber(k['Average Savings per Fully Deployed Course']);
 
   byId('projectedGrowthLine').innerHTML =
-    `If the ${formatNumber.format(developing)} courses currently in development are fully deployed, MTC could save students an additional <strong>${formatCurrency.format(projected)}</strong>.`;
+    `When the ${formatNumber.format(developing)} courses currently in development are fully deployed, MTC could save students an additional <strong>${formatCurrency.format(projected)}</strong>.`;
 
   byId('projectedGrowthNote').textContent =
     `This projection is based on the average savings per fully deployed course (${formatCurrency.format(average)}) and does not estimate future section-level enrollment.`;
