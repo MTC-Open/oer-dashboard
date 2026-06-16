@@ -114,6 +114,13 @@
   border-left-color: var(--gold);
   background: #fff8ea;
 }
+
+/* Student Success Case Studies tab */
+.success-intro{background:#f4f7f9;border-left:6px solid var(--blue);border-radius:12px;padding:16px 18px;margin:16px 0;color:var(--text)}
+.success-intro h2{margin:0 0 8px;color:var(--navy);text-transform:uppercase;letter-spacing:-.02em}.success-intro p{margin:0 0 10px}.success-intro p:last-child{margin-bottom:0}
+.success-summary{display:grid;grid-template-columns:repeat(4,minmax(160px,1fr));gap:14px;margin:18px 0}.success-kpi{background:#fff;border:1px solid var(--border);border-left:7px solid var(--green);border-radius:16px;padding:16px;box-shadow:var(--shadow)}.success-kpi:nth-child(2){border-left-color:var(--gold)}.success-kpi:nth-child(3){border-left-color:var(--teal)}.success-kpi:nth-child(4){border-left-color:var(--blue)}.success-kpi .label{color:var(--navy);font-weight:800;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}.success-kpi .value{color:var(--navy);font-weight:900;font-size:clamp(1.45rem,3vw,2.05rem);letter-spacing:-.04em;line-height:1}.success-kpi p{margin:8px 0 0;color:#647174;font-size:.88rem}
+.case-study-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:16px 0}.case-study-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-width:0}.case-study-card h3{margin:0 0 8px;color:var(--navy);letter-spacing:-.02em;text-transform:uppercase}.case-study-card p{margin:0 0 12px;color:#647174;font-size:.92rem}.metric-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}.mini-stat{background:#f8fbfc;border:1px solid #e7eef2;border-radius:12px;padding:10px}.mini-stat strong{display:block;color:var(--navy);font-size:1.35rem;line-height:1;font-weight:900}.mini-stat span{display:block;margin-top:5px;color:#505859;font-size:.84rem}.mini-stat .positive{color:#2e651a}.mini-stat .watch{color:#8a5700}.success-table{width:100%;min-width:0;border-collapse:collapse;margin-top:10px}.success-table th,.success-table td{padding:9px 10px;border-bottom:1px solid #e7eef2;text-align:left;vertical-align:top;font-size:.9rem}.success-table th{background:var(--navy);color:#fff;position:static;cursor:default;white-space:normal}.success-table td:first-child{font-weight:700;color:var(--navy)}.success-good{color:#2e651a;font-weight:900}.success-watch{color:#8a5700;font-weight:900}.method-box{background:#fff8ea;border:1px solid #f8d389;border-left:7px solid var(--gold);border-radius:16px;padding:18px;box-shadow:var(--shadow);margin:16px 0}.method-box h3{margin:0 0 8px;color:var(--navy);text-transform:uppercase}.method-box p{margin:0 0 10px;color:#647174;font-size:.92rem}.method-box ul{margin:8px 0 0;padding-left:20px}.method-box li{margin:6px 0}@media(max-width:980px){.success-summary,.case-study-grid{grid-template-columns:1fr 1fr}.metric-row{grid-template-columns:1fr}}@media(max-width:640px){.success-summary,.case-study-grid{grid-template-columns:1fr}}
+
   </style>
 </head>
 <body><main class="dashboard">
@@ -126,6 +133,7 @@
   <button class="tab-btn" data-tab="overview" aria-selected="true">Executive Overview</button>
   <button class="tab-btn" data-tab="courses" aria-selected="false">Course-Level Impact</button>
   <button class="tab-btn" data-tab="perceptions" aria-selected="false">OER Student Perceptions</button>
+  <button class="tab-btn" data-tab="success-cases" aria-selected="false">Student Success Case Studies</button>
 </nav>
 
 <section id="dashboardFilters" class="filters" aria-label="Dashboard filters">
@@ -321,7 +329,150 @@
   <strong>Note:</strong> Student perception results reflect Spring 2026 survey responses. Filters apply only to survey results and may be limited when response counts are too small to interpret responsibly.
 </div>
 <div id="perceptionFilterNote" class="filter-warning" role="status" aria-live="polite"></div>
-  <section class="callout blue full-card"><h2>Key Takeaways</h2><ul class="takeaways" id="takeaways"></ul></section><section class="grid-2"><article class="card"><h2>Survey Context</h2><table class="field-table"><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody id="methodologyTable"></tbody></table></article><article class="card"><h2>Student Cost &amp; Access Experience</h2><p>Students reported how textbook costs affected them before OER and how they view OER materials now.</p><table class="field-table"><thead><tr><th>Measure</th><th>Result</th><th>What it means</th></tr></thead><tbody id="costAccessBeforeTable"></tbody></table><p style="margin-top:14px"><strong>OER Perceptions:</strong></p><table class="field-table"><thead><tr><th>Measure</th><th>Result</th><th>What it means</th></tr></thead><tbody id="oerOutcomesTable"></tbody></table></article></section><section class="card full-card"><h2>Student Satisfaction with OER</h2><p>Average ratings on a 1–5 scale.</p><table class="field-table"><thead><tr><th>Measure</th><th>Average rating</th><th>Positive responses</th><th>Visual rating</th></tr></thead><tbody id="satisfactionTable"></tbody></table></section><section class="grid-2"><article class="card"><h2>Cost Barriers Students Faced Before OER</h2><p>Cost consequences reported by survey respondents.</p><div class="chart-wrap"><canvas id="barriersChart"></canvas></div></article><article class="card"><h2>OER Quality Compared with Paid Textbooks</h2><p>How students rated OER materials compared with traditional paid textbooks.</p><div class="chart-wrap"><canvas id="qualityChart"></canvas></div><div class="callout blue quality-callout"><div class="percent" id="equalBetterPercent">—</div><div><strong>rated OER comparable or better</strong><br>than paid textbooks</div></div></article></section></section><div id="errorBox" class="error"></div></main>
+  <section class="callout blue full-card"><h2>Key Takeaways</h2><ul class="takeaways" id="takeaways"></ul></section><section class="grid-2"><article class="card"><h2>Survey Context</h2><table class="field-table"><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody id="methodologyTable"></tbody></table></article><article class="card"><h2>Student Cost &amp; Access Experience</h2><p>Students reported how textbook costs affected them before OER and how they view OER materials now.</p><table class="field-table"><thead><tr><th>Measure</th><th>Result</th><th>What it means</th></tr></thead><tbody id="costAccessBeforeTable"></tbody></table><p style="margin-top:14px"><strong>OER Perceptions:</strong></p><table class="field-table"><thead><tr><th>Measure</th><th>Result</th><th>What it means</th></tr></thead><tbody id="oerOutcomesTable"></tbody></table></article></section><section class="card full-card"><h2>Student Satisfaction with OER</h2><p>Average ratings on a 1–5 scale.</p><table class="field-table"><thead><tr><th>Measure</th><th>Average rating</th><th>Positive responses</th><th>Visual rating</th></tr></thead><tbody id="satisfactionTable"></tbody></table></section><section class="grid-2"><article class="card"><h2>Cost Barriers Students Faced Before OER</h2><p>Cost consequences reported by survey respondents.</p><div class="chart-wrap"><canvas id="barriersChart"></canvas></div></article><article class="card"><h2>OER Quality Compared with Paid Textbooks</h2><p>How students rated OER materials compared with traditional paid textbooks.</p><div class="chart-wrap"><canvas id="qualityChart"></canvas></div><div class="callout blue quality-callout"><div class="percent" id="equalBetterPercent">—</div><div><strong>rated OER comparable or better</strong><br>than paid textbooks</div></div></article></section></section>
+<section id="success-cases" class="tab-panel">
+  <div class="success-intro">
+    <h2>Student Success Case Studies</h2>
+    <p>
+      These selected case studies highlight long-running OER course redesigns with available before-and-after comparison data. They are intended to show promising patterns in student success, affordability, and access, not to serve as a comprehensive institutional outcomes report.
+    </p>
+    <p>
+      Results should be interpreted cautiously. Student outcomes may be influenced by multiple factors, including enrollment patterns, course modality, instructor mix, student preparation, and broader course redesign efforts.
+    </p>
+  </div>
+
+  <section class="success-summary" aria-label="Summary of selected OER student success case studies">
+    <article class="success-kpi">
+      <div class="label">Selected Courses</div>
+      <div class="value">4</div>
+      <p>Long-running or high-impact OER courses with available comparison data.</p>
+    </article>
+
+    <article class="success-kpi">
+      <div class="label">Pass Rate Patterns</div>
+      <div class="value">4 of 4</div>
+      <p>Featured courses showed improved pass rates after OER implementation.</p>
+    </article>
+
+    <article class="success-kpi">
+      <div class="label">Equity Patterns</div>
+      <div class="value">3 of 4</div>
+      <p>Featured courses showed stronger pass-rate gains for Pell recipients.</p>
+    </article>
+
+    <article class="success-kpi">
+      <div class="label">Access + Success</div>
+      <div class="value">OER</div>
+      <p>Selected examples connect affordability with student access and course completion.</p>
+    </article>
+  </section>
+
+  <section class="case-study-grid" aria-label="Featured OER student success case studies">
+    <article class="case-study-card">
+      <h3>AHS 102: Medical Terminology</h3>
+      <p>
+        AHS 102 is a high-impact course for students entering health care pathways and has served as a strong example of OER course redesign at MTC. After OER implementation, students had immediate access to course materials integrated into the learning environment.
+      </p>
+
+      <div class="metric-row">
+        <div class="mini-stat"><strong class="positive">+10.0 pp</strong><span>Pass-rate increase</span></div>
+        <div class="mini-stat"><strong class="positive">-3.2 pp</strong><span>Withdrawal-rate decrease</span></div>
+        <div class="mini-stat"><strong class="positive">+10.6 pp</strong><span>Pass-rate gain for Pell recipients</span></div>
+      </div>
+
+      <table class="success-table">
+        <thead><tr><th scope="col">Measure</th><th scope="col">Before OER</th><th scope="col">After OER</th><th scope="col">Change</th></tr></thead>
+        <tbody>
+          <tr><td>Pass rate</td><td>58.7%</td><td>68.7%</td><td class="success-good">+10.0 percentage points</td></tr>
+          <tr><td>Withdrawal rate</td><td>26.1%</td><td>22.8%</td><td class="success-good">-3.2 percentage points</td></tr>
+          <tr><td>Pell recipient outcomes</td><td colspan="2">Pell students showed a slightly larger gain than non-Pell students.</td><td class="success-good">Gap narrowed</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="case-study-card">
+      <h3>PSY 201: General Psychology</h3>
+      <p>
+        PSY 201 is a high-enrollment general education course, making affordability and access especially important. After OER implementation, the course showed one of the strongest pass-rate improvements among the selected examples.
+      </p>
+
+      <div class="metric-row">
+        <div class="mini-stat"><strong class="positive">+12.2 pp</strong><span>Pass-rate increase</span></div>
+        <div class="mini-stat"><strong class="positive">-9.0 pp</strong><span>Withdrawal-rate decrease</span></div>
+        <div class="mini-stat"><strong class="positive">+13.8 pp</strong><span>Pass-rate gain for Pell recipients</span></div>
+      </div>
+
+      <table class="success-table">
+        <thead><tr><th scope="col">Measure</th><th scope="col">Before OER</th><th scope="col">After OER</th><th scope="col">Change</th></tr></thead>
+        <tbody>
+          <tr><td>Pass rate</td><td>61.9%</td><td>74.1%</td><td class="success-good">+12.2 percentage points</td></tr>
+          <tr><td>Withdrawal rate</td><td>27.1%</td><td>18.2%</td><td class="success-good">-9.0 percentage points</td></tr>
+          <tr><td>Pell recipient outcomes</td><td colspan="2">Pell students showed a larger gain than non-Pell students.</td><td class="success-good">Gap narrowed</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="case-study-card">
+      <h3>SOC 101: Introduction to Sociology</h3>
+      <p>
+        SOC 101 is a high-enrollment general education course where textbook affordability can affect many students. The available comparison data showed improved pass rates, lower withdrawals, and stronger gains for Pell recipients.
+      </p>
+
+      <div class="metric-row">
+        <div class="mini-stat"><strong class="positive">+9.4 pp</strong><span>Pass-rate increase</span></div>
+        <div class="mini-stat"><strong class="positive">-3.9 pp</strong><span>Withdrawal-rate decrease</span></div>
+        <div class="mini-stat"><strong class="positive">+12.2 pp</strong><span>Pass-rate gain for Pell recipients</span></div>
+      </div>
+
+      <table class="success-table">
+        <thead><tr><th scope="col">Measure</th><th scope="col">Before OER</th><th scope="col">After OER</th><th scope="col">Change</th></tr></thead>
+        <tbody>
+          <tr><td>Pass rate</td><td>68.0%</td><td>77.4%</td><td class="success-good">+9.4 percentage points</td></tr>
+          <tr><td>Withdrawal rate</td><td>21.6%</td><td>17.7%</td><td class="success-good">-3.9 percentage points</td></tr>
+          <tr><td>Pell recipient outcomes</td><td colspan="2">Pell students showed a larger gain than non-Pell students.</td><td class="success-good">Gap narrowed</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="case-study-card">
+      <h3>MAT 120: Introductory Statistics</h3>
+      <p>
+        MAT 120 is a gateway math course with broad relevance across academic programs. The available data showed a meaningful pass-rate increase after OER implementation. Equity patterns should continue to be monitored because non-Pell students showed a larger gain than Pell recipients in this comparison.
+      </p>
+
+      <div class="metric-row">
+        <div class="mini-stat"><strong class="positive">+9.5 pp</strong><span>Pass-rate increase</span></div>
+        <div class="mini-stat"><strong class="positive">-1.8 pp</strong><span>Withdrawal-rate decrease</span></div>
+        <div class="mini-stat"><strong class="watch">Watch</strong><span>Equity gap widened in this comparison</span></div>
+      </div>
+
+      <table class="success-table">
+        <thead><tr><th scope="col">Measure</th><th scope="col">Before OER</th><th scope="col">After OER</th><th scope="col">Change</th></tr></thead>
+        <tbody>
+          <tr><td>Pass rate</td><td>47.3%</td><td>56.8%</td><td class="success-good">+9.5 percentage points</td></tr>
+          <tr><td>Withdrawal rate</td><td>35.0%</td><td>33.3%</td><td class="success-good">-1.8 percentage points</td></tr>
+          <tr><td>Pell recipient outcomes</td><td colspan="2">Both Pell and non-Pell students improved, but non-Pell students showed a larger gain.</td><td class="success-watch">Gap widened</td></tr>
+        </tbody>
+      </table>
+    </article>
+  </section>
+
+  <section class="method-box">
+    <h3>How to Read These Case Studies</h3>
+    <p>
+      These examples use available course-level comparisons before and after OER implementation. Like-semester comparisons are used where possible to reduce seasonal enrollment effects.
+    </p>
+    <ul>
+      <li><strong>Pass rate:</strong> A higher percentage means more students completed the course successfully.</li>
+      <li><strong>Withdrawal rate:</strong> A lower percentage means fewer students withdrew from the course.</li>
+      <li><strong>Pell recipient outcomes:</strong> These comparisons help show whether OER redesign may be supporting students with financial need.</li>
+    </ul>
+    <p>
+      These results show promising patterns associated with selected OER redesigns. They should not be interpreted as proof that OER alone caused the changes. Enrollment patterns, modality, instructor mix, student preparation, and other course changes may also affect outcomes.
+    </p>
+  </section>
+</section>
+<div id="errorBox" class="error"></div></main>
 <script>
 const DATA_URL='data/dashboard-data.json';
 const COLORS={navy:'#0c436a',blue:'#238cc1',gold:'#f5a81c',green:'#79bc43',teal:'#007166',orange:'#e75525',gray:'#8e9c9c',lightBlue:'#b8d1dc',text:'#505859'};
@@ -504,7 +655,7 @@ function statusLabel(status){const s=(status||'all').toLowerCase();if(s==='all')
 function renderKpiLabels(){const status=statusFilterValue();byId('kpiSavingsLabel').textContent='Estimated student savings';byId('kpiEnrollmentLabel').textContent='Enrollments impacted';byId('kpiCoursesLabel').textContent=statusLabel(status);byId('kpiSectionsLabel').textContent='OER sections'}
 function launchTerm(row){return norm(row['Rollout Semester'] || row['Semester Full Rollout']) || 'Not yet launched'}
 function init(){if(byId('refreshedDate')) byId('refreshedDate').textContent=dashboardData?.metadata?.refreshed||'—';populateSemesterFilter();populateSelect('departmentFilter','All departments',uniqueSorted(dashboardData.courseImpact.map(r=>norm(r.Department))));populateStatusFilter();populateSelect('courseFilter','All courses',uniqueSorted(dashboardData.courseImpact.map(r=>course(r.Course))));['semesterFilter','departmentFilter','statusFilter'].forEach(id=>byId(id).addEventListener('change',()=>{currentPage=1;refreshGlobalFilterOptions();update()}));byId('courseFilter').addEventListener('change',()=>{currentPage=1;update()});byId('tableSearch').addEventListener('input',()=>{currentPage=1;renderTable()});document.querySelectorAll('#impactTable th[data-sort]').forEach(th=>th.addEventListener('click',()=>{const key=th.dataset.sort;if(sortState.key===key){sortState.direction=sortState.direction==='asc'?'desc':'asc'}else{sortState.key=key;sortState.direction=['Enrollment','Savings'].includes(key)?'desc':'asc'}renderTable()}));byId('prevPage').addEventListener('click',()=>{if(currentPage>1){currentPage--;renderTable()}});byId('nextPage').addEventListener('click',()=>{currentPage++;renderTable()});document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>showTab(btn.dataset.tab)));initPerceptionFilters();update();renderStaticPerceptions()}
-function showTab(tab){document.querySelectorAll('.tab-btn').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab?'true':'false'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===tab));const filters=byId('dashboardFilters');if(filters)filters.classList.toggle('hidden',tab==='perceptions');setTimeout(()=>Object.values(charts).filter(Boolean).forEach(c=>c.resize()),50)}
+function showTab(tab){document.querySelectorAll('.tab-btn').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab?'true':'false'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===tab));const filters=byId('dashboardFilters');if(filters)filters.classList.toggle('hidden',['perceptions','success-cases'].includes(tab));setTimeout(()=>Object.values(charts).filter(Boolean).forEach(c=>c.resize()),50)}
 function topRows(rows,sem,metric,limit=10){return rows.map(r=>({course:course(r.Course),value:getMetric(r,sem,metric)})).filter(x=>x.value>0).sort((a,b)=>b.value-a.value).slice(0,limit)}
 function update(){const implementationRows=implementationRowsFiltered(), impactRows=rowsFiltered(), sem=byId('semesterFilter').value;const enrollment=impactRows.reduce((s,r)=>s+getMetric(r,sem,'enrollment'),0), savings=impactRows.reduce((s,r)=>s+getMetric(r,sem,'savings'),0), sections=impactRows.reduce((s,r)=>s+getSections(r,sem),0), courses=new Set(implementationRows.map(r=>course(r.Course))).size;renderKpiLabels();byId('kpiSavings').textContent=formatCurrency.format(savings);byId('kpiEnrollment').textContent=formatNumber.format(enrollment);byId('kpiCourses').textContent=formatNumber.format(courses);byId('kpiSections').textContent=formatNumber.format(sections);renderProjectedGrowth();const costConcern=(dashboardData.costAccessBefore||[]).find(x=>norm(x.Metric).toLowerCase().includes('cost'));const skipped=(dashboardData.costAccessBefore||[]).find(x=>norm(x.Metric).toLowerCase().includes('skipped'));byId('costConcernOverview').textContent=formatPercent.format(toNumber(costConcern?.Value));byId('skippedBuyingOverview').textContent=formatPercent.format(toNumber(skipped?.Value));renderCharts(impactRows,implementationRows,sem);renderTable()}
 function renderProjectedGrowth(){
