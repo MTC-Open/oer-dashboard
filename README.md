@@ -1,267 +1,76 @@
 # Open Education Data Dashboard
 
-Public-facing Open Education impact dashboard for Midlands Technical College. The dashboard is designed for embedding in a LibGuide and hosting through GitHub Pages.
+Public-facing Open Education impact dashboard for Midlands Technical College, hosted at [mtc-open.github.io/oer-dashboard](https://mtc-open.github.io/oer-dashboard/) and suitable for embedding in LibGuides.
 
-## What this dashboard shows
+## Public repository files
 
-The dashboard separates **verified OER impact** from the broader **OER implementation pipeline**.
+- `index.html`: dashboard page and display logic.
+- `data/dashboard-data.json`: aggregate dashboard data.
+- `README.md`: public documentation.
 
-Verified impact includes:
+Keep source workbooks, survey exports, student records, updater scripts, local instructions, archives, backups, and build receipts out of this public repository.
 
-* fully deployed OER courses only
-* only the terms beginning with each course’s deployment term
-* estimated student savings
-* enrollments impacted
-* OER sections
+## Private preparation and publishing
 
-Pipeline/status information includes:
+The local `update_dashboard_data.py` reads **Master Data for Dashboard.xlsx directly**. The old dashboard workbook and Power Query intermediary are no longer required.
 
-* total OER pipeline courses
-* fully deployed courses
-* courses in development
-* courses in pilot
+Additional private inputs are the Summer 2026 survey response export and the institutional course-success report containing final registration records.
 
-Pilot and development courses are shown as implementation status, but they are **not included** in verified savings, enrollment, or section totals.
+1. Save the current master workbook in Excel so calculated values are up to date, then close it.
+2. In the private **For Publishing** folder, run `python update_dashboard_data.py`. The updater locates the master and supporting reports in the established program folders.
+3. Review the generated `release` folder through a local web server. Check totals, survey periods, response-rate notes, and all four Student Success Case Studies.
+4. Publish `release/index.html` as repository-root `index.html` and `release/data/dashboard-data.json` as `data/dashboard-data.json`. Publish both together when page behavior or the data format changes.
+5. Update this README when the workflow changes.
+6. Check the GitHub Pages deployment and the live dashboard and LibGuide embed.
 
-## Public files to upload to GitHub
+Only the contents of `release` belong in the public dashboard package. Do not upload the whole private publishing folder.
 
-Upload or replace these files in the public GitHub repository:
+The updater validates course rosters, implementation status, section keys, enrollment reconciliation, and savings arithmetic. It checks source hashes before and after reading and prepares aggregate public data without modifying the original workbooks. Preparation alone does not publish anything.
 
-```text
-oer-dashboard/
-├── index.html
-└── data/
-    └── dashboard-data.json
-```
+## Impact and projected growth
 
-These are the only files required for the public dashboard.
+Actual savings, enrollment, and section counts include eligible fully deployed courses beginning with their recorded full-rollout term. Enrollments are course registrations, not unique students.
 
-## Private files to keep off GitHub
+The implementation pipeline includes fully deployed, pilot, and development courses. Projected growth includes **both pilot and development courses**, multiplied by the existing average savings per fully deployed course with recorded impact. This is a projection separate from actual savings and does not estimate future section-level enrollment.
 
-Do **not** upload these files to the public repository:
+Savings are estimates based on recorded textbook-cost baselines, including default baselines where used. They are gross avoided textbook costs; printing and ancillary costs are not deducted.
 
-```text
-Master Data for Dashboard.xlsx
-OER Data for Dashboard.xlsx
-update_dashboard_data.py
-```
+The academic-year impact view combines Fall, Spring, and Summer. The Course-Level Impact page shows verified impact for the selected term or academic year.
 
-`Master Data for Dashboard.xlsx` is the main working file where the source data is updated and maintained.
+## OER Student Perceptions
 
-`OER Data for Dashboard.xlsx` is updated through Power Query and serves as the structured workbook used to generate the public JSON file.
+Survey results are separate from actual savings calculations. The survey impact-period control offers Spring 2026, Summer 2026, and all survey periods, with department, discipline, and course filters.
 
-`update_dashboard_data.py` is the local Python script used to generate `dashboard-data.json`.
+- Spring contains 1,171 response records.
+- Summer contains 753 valid response records after four explicit test submissions are excluded.
+- Combined results contain 1,924 response records; these are not unique students.
+- Positive agreement percentages use valid item responses, not a mean score divided by five.
+- Small filtered groups with fewer than ten responses are suppressed.
+- Summer quality questions concern usefulness, clarity, and relevance; Spring questions concern overall textbook quality. The dashboard identifies this wording difference.
+- “Experienced barriers due to textbook costs” reflects reporting cost-related consequences.
+- The executive overview's cost-barrier figures combine both survey periods.
 
-## Data workflow
+### Estimated response rates
 
-The dashboard data begins in:
+Survey enrollment matching uses final institutional registration records for **all surveyed sections, including pilots**, rather than the savings-eligible footprint.
 
-```text
-Master Data for Dashboard.xlsx
-```
+The estimated rate divides matched response records by enrollment records in those same sections. Each matched section enters the denominator once; this is not an average of section rates.
 
-That workbook is the main private source file.
+| Period | Matched responses | Enrollment records | Matched sections | Estimated rate | Unmatched responses |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Spring 2026 | 1,168 | 3,772 | 175 | 31.0% | 3 |
+| Summer 2026 | 739 | 2,237 | 107 | 33.0% | 14 |
+| All survey periods | 1,907 | 6,009 | 282 | 31.7% | 17 |
 
-Power Query then updates:
+Unmatched responses remain in survey findings and are excluded only from response-rate calculations. Final registration records do not establish invitation coverage, and repeat submissions may occur. One Summer section has more response records than enrollment records. These rates are estimates, and the dashboard shows the matching basis. Department and course filters do not recalculate the overall period response rate.
 
-```text
-OER Data for Dashboard.xlsx
-```
+## Student Success Case Studies
 
-The Python updater reads the updated dashboard workbook and generates:
-
-```text
-data/dashboard-data.json
-```
-
-The public dashboard reads from that JSON file.
-
-## Routine update workflow
-
-Use this process when refreshing dashboard data:
-
-1. Open `Master Data for Dashboard.xlsx`.
-
-2. Update the source data as needed.
-
-3. Refresh the Power Query connections so `OER Data for Dashboard.xlsx` updates.
-
-4. Save `OER Data for Dashboard.xlsx`.
-
-5. Run the Python updater locally:
-
-   ```bash
-   python update_dashboard_data.py "OER Data for Dashboard.xlsx"
-   ```
-
-6. Confirm that a new file was created or updated at:
-
-   ```text
-   data/dashboard-data.json
-   ```
-
-7. Upload or commit only this file to GitHub:
-
-   ```text
-   data/dashboard-data.json
-   ```
-
-8. Refresh the GitHub Pages dashboard and LibGuide embed to confirm the numbers updated.
-
-## When to upload `index.html`
-
-Only upload or replace `index.html` when the dashboard design, wording, layout, filters, or JavaScript behavior changes.
-
-For ordinary data updates, only `data/dashboard-data.json` needs to change.
-
-## Term-based data logic
-
-The dashboard is designed around terms instead of hard-coded Fall/Spring fields.
-
-Supported term pattern examples:
-
-```text
-FA25
-SP26
-SU26
-FA26
-SP27
-```
-
-The core impact rule is:
-
-```text
-For each course, count only terms where the course is fully deployed by that term.
-```
-
-This allows Summer 2026 and future terms to be added without redesigning the dashboard. New term data should be added to the workbook, Power Query should refresh `OER Data for Dashboard.xlsx`, and the updater should regenerate `dashboard-data.json`.
-
-## Impact-period filter
-
-The dashboard’s impact-period filter should represent a reporting period such as:
-
-```text
-AY 2025-2026 impact to date
-Fall 2025
-Spring 2026
-Summer 2026
-```
-
-At MTC, the academic year includes:
-
-```text
-Fall
-Spring
-Summer
-```
-
-For example:
-
-```text
-AY 2025-2026 = Fall 2025 + Spring 2026 + Summer 2026
-```
-
-The combined academic-year view sums only eligible term-level impact for each course. A course deployed in Spring 2026, for example, is not counted for Fall 2025 impact.
-
-## Course-Level Impact page
-
-The Course-Level Impact page shows verified OER impact only. It should not include pilot or in-development courses as savings impact.
-
-The course table uses **Verified term(s)** to show the term or terms where a course is actually counted in the selected impact period.
-
-## OER Student Perceptions page
-
-The Student Perceptions page is survey-based and separate from the verified savings/enrollment calculations.
-
-Important display rules:
-
-* Use plain-language labels where possible.
-* Avoid raw score notation in key takeaways.
-* Use percentage-based outcomes for public readability when the underlying data supports it.
-* Response-rate filtering should not appear dynamic unless the JSON includes filtered response-rate denominators.
-
-## Notes on interpretation
-
-* **Estimated student savings** are based on enrollment and textbook cost assumptions.
-* **Enrollments impacted** may include duplicated students across courses or terms.
-* **OER sections** count sections associated with verified OER impact.
-* **Fully deployed courses** are current implementation-status counts, while savings, enrollment, and section totals are term-aware.
-* Pilot and in-development courses represent pipeline activity and are excluded from verified impact totals until full deployment can be confirmed.
-
-## Current public-hosting model
-
-The dashboard can be hosted on GitHub Pages and embedded in LibGuides with an iframe.
-
-Typical public dashboard URL pattern:
-
-```text
-https://huffmtc.github.io/oer-dashboard/
-```
-
-Typical public JSON URL pattern:
-
-```text
-https://huffmtc.github.io/oer-dashboard/data/dashboard-data.json
-```
+Preserve the original language and reported results for all four case studies: **AHS 102, PSY 201, SOC 101, and MAT 120**. The case-study results are retained as originally published rather than recalculated by the current-data updater.
 
 ## Troubleshooting
 
-If the dashboard shows dashes or blank charts:
+If charts or figures are blank, confirm that both public dashboard files are present at the correct paths, open the [public JSON](https://mtc-open.github.io/oer-dashboard/data/dashboard-data.json), and hard-refresh the [dashboard](https://mtc-open.github.io/oer-dashboard/).
 
-1. Confirm that `data/dashboard-data.json` exists in the GitHub repository.
+If numbers differ from a workbook total, check the source date, current implementation status, rollout eligibility, enrollment scope, and textbook-cost assumptions. Survey enrollment denominators deliberately include pilot sections; actual savings do not.
 
-2. Confirm the file path is exactly:
-
-   ```text
-   data/dashboard-data.json
-   ```
-
-3. Open the public JSON URL directly in a browser to confirm it loads.
-
-4. Hard-refresh the dashboard page.
-
-5. Check that `index.html` and `dashboard-data.json` were both uploaded to the correct repository and branch.
-
-If the dashboard numbers do not match the Excel workbook:
-
-* Confirm that `Master Data for Dashboard.xlsx` was updated.
-* Confirm that Power Query refreshed `OER Data for Dashboard.xlsx`.
-* Confirm that the Python updater was run against the updated `OER Data for Dashboard.xlsx`.
-* Check whether Excel totals include pilot or development courses.
-* Check whether Excel totals include pre-deployment terms.
-* The public dashboard should use verified, term-aware impact totals unless intentionally changed.
-
-## What to upload after changes
-
-### Data-only update
-
-Upload:
-
-```text
-data/dashboard-data.json
-```
-
-### Design or wording update
-
-Upload:
-
-```text
-index.html
-```
-
-### Full public dashboard update
-
-Upload:
-
-```text
-index.html
-data/dashboard-data.json
-```
-
-Do not upload:
-
-```text
-Master Data for Dashboard.xlsx
-OER Data for Dashboard.xlsx
-update_dashboard_data.py
-```
